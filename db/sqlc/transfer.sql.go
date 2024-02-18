@@ -51,10 +51,16 @@ const getTransfer = `-- name: GetTransfer :one
 SELECT id, owner, balance, currency, created_at FROM accounts
 WHERE id = $1 
 LIMIT 1
+OFFSET $2
 `
 
-func (q *Queries) GetTransfer(ctx context.Context, id int64) (Account, error) {
-	row := q.db.QueryRow(ctx, getTransfer, id)
+type GetTransferParams struct {
+	ID     int64 `json:"id"`
+	Offset int64 `json:"offset"`
+}
+
+func (q *Queries) GetTransfer(ctx context.Context, arg GetTransferParams) (Account, error) {
+	row := q.db.QueryRow(ctx, getTransfer, arg.ID, arg.Offset)
 	var i Account
 	err := row.Scan(
 		&i.ID,

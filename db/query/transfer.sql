@@ -12,8 +12,8 @@ created_at
 -- name: GetTransfer :one
 SELECT * FROM accounts
 WHERE id = $1 
-LIMIT 1;
-
+LIMIT 1
+OFFSET $2;
 
 -- name: ListTransfer :many
 SELECT * FROM accounts
