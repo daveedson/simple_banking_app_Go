@@ -7,3 +7,14 @@ created_at
 ) VALUES (
   $1, $2, $3, $4
 )RETURNING *;
+
+
+-- name: GetTransfer :one
+SELECT * FROM accounts
+WHERE id = $1 
+LIMIT 1;
+
+
+-- name: ListTransfer :many
+SELECT * FROM accounts
+ORDER BY id;
