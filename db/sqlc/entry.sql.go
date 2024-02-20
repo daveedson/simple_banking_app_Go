@@ -7,8 +7,7 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const creatEntry = `-- name: CreatEntry :one
@@ -23,14 +22,14 @@ INSERT INTO accounts (
 `
 
 type CreatEntryParams struct {
-	Owner     string           `json:"owner"`
-	Balance   int64            `json:"balance"`
-	Currency  string           `json:"currency"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	Owner     string    `json:"owner"`
+	Balance   int64     `json:"balance"`
+	Currency  string    `json:"currency"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (q *Queries) CreatEntry(ctx context.Context, arg CreatEntryParams) (Account, error) {
-	row := q.db.QueryRow(ctx, creatEntry,
+	row := q.db.QueryRowContext(ctx, creatEntry,
 		arg.Owner,
 		arg.Balance,
 		arg.Currency,
@@ -54,7 +53,7 @@ LIMIT 1
 `
 
 func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
-	row := q.db.QueryRow(ctx, getEntry, id)
+	row := q.db.QueryRowContext(ctx, getEntry, id)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -78,7 +77,7 @@ type ListEntriesParams struct {
 }
 
 func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error) {
-	rows, err := q.db.Query(ctx, listEntries, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listEntries, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +94,9 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

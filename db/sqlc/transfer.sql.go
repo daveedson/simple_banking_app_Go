@@ -7,8 +7,7 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const createTransfer = `-- name: CreateTransfer :one
@@ -23,14 +22,14 @@ created_at
 `
 
 type CreateTransferParams struct {
-	FromAccountID int64            `json:"from_account_id"`
-	ToAccountID   int64            `json:"to_account_id"`
-	Amount        int64            `json:"amount"`
-	CreatedAt     pgtype.Timestamp `json:"created_at"`
+	FromAccountID int64     `json:"from_account_id"`
+	ToAccountID   int64     `json:"to_account_id"`
+	Amount        int64     `json:"amount"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
-	row := q.db.QueryRow(ctx, createTransfer,
+	row := q.db.QueryRowContext(ctx, createTransfer,
 		arg.FromAccountID,
 		arg.ToAccountID,
 		arg.Amount,
@@ -60,7 +59,7 @@ type GetTransferParams struct {
 }
 
 func (q *Queries) GetTransfer(ctx context.Context, arg GetTransferParams) (Account, error) {
-	row := q.db.QueryRow(ctx, getTransfer, arg.ID, arg.Offset)
+	row := q.db.QueryRowContext(ctx, getTransfer, arg.ID, arg.Offset)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -78,7 +77,7 @@ ORDER BY id
 `
 
 func (q *Queries) ListTransfer(ctx context.Context) ([]Account, error) {
-	rows, err := q.db.Query(ctx, listTransfer)
+	rows, err := q.db.QueryContext(ctx, listTransfer)
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +95,9 @@ func (q *Queries) ListTransfer(ctx context.Context) ([]Account, error) {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
