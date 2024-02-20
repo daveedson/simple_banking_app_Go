@@ -3,11 +3,13 @@ package db
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateAccount(t *testing.T) {
+// helper function for creating an account in the test.
+func CreateRandomAccount(t *testing.T) Account {
 
 	arguments := CreatAccountParams{
 		Owner:    "Thomas",
@@ -25,4 +27,25 @@ func TestCreateAccount(t *testing.T) {
 
 	require.NotZero(t, account.ID)
 	require.NotZero(t, account.CreatedAt)
+
+	return account
+}
+func TestCreateAccount(t *testing.T) {
+	CreateRandomAccount(t)
+}
+
+func TestGetAccount(t *testing.T) {
+	firstAccount := CreateRandomAccount(t)
+	acc, err := testQueries.GetAccount(context.Background(), firstAccount.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, acc)
+
+	require.Equal(t,acc.Balance, firstAccount.Balance)
+	require.Equal(t,acc.ID, firstAccount.ID)
+	require.Equal(t,acc.Currency, firstAccount.Currency)
+	require.WithinDuration(t,acc.CreatedAt, firstAccount.CreatedAt,time.Second)
+	require.Equal(t,acc.Owner, firstAccount.Owner)
+
+
 }
