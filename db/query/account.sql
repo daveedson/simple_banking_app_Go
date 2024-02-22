@@ -20,7 +20,7 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
--- name: UpdateAuthorBios :one
+-- name: UpdateAccount :one
 UPDATE accounts 
 SET balance = $2
 WHERE id = $1
