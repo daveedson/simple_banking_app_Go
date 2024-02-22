@@ -82,3 +82,7 @@ func TestDeleteAccount(t *testing.T) {
 	require.Empty(t,account2)
 
 }
+
+func TestListAccount(t *require.TestingT){
+	
+}
