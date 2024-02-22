@@ -68,3 +68,8 @@ func TestUpdateAccount(t *testing.T) {
 	require.WithinDuration(t, acc.CreatedAt, account.CreatedAt, time.Second)
 
 }
+
+
+func TestDeleteAccount(t *testing.T){
+	
+}
